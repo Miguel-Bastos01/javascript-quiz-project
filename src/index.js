@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const choiceContainer = document.querySelector("#choices");
   const nextButton = document.querySelector("#nextButton");
   const restartButton = document.querySelector("#restartButton");
+  const error = document.querySelector("#error");
 
   // End view elements
   const resultContainer = document.querySelector("#result");
@@ -20,6 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Show the quiz view (div#quizView) and hide the end view (div#endView)
   quizView.style.display = "block";
   endView.style.display = "none";
+  error.style.display = "none";
 
   /************  QUIZ DATA  ************/
 
@@ -182,20 +184,18 @@ document.addEventListener("DOMContentLoaded", () => {
     // YOUR CODE HERE:
     //
     // 1. Show the question
-    // Update the inner text of the question container element and show the question text
-    questionContainer.innerText = question.text;
-
     // 2. Update the green progress bar
-    // Update the green progress bar (div#progressBar) width so that it shows the percentage of questions answered
+    // 3. Update the question count text
+    // 4. Create and display new radio input element with a label for each choice.
+
+    questionContainer.innerText = question.text;
 
     const totalQuestions = questions.length;
     const currentQuestionIndex = quiz.currentQuestionIndex;
     const percentQuestion = (currentQuestionIndex / totalQuestions) * 100;
 
-    progressBar.style.width = `${percentQuestion}%`; // This value is hardcoded as a placeholder
+    progressBar.style.width = `${percentQuestion}%`;
 
-    // 3. Update the question count text
-    // Update the question count (div#questionCount) show the current question out of total questions
     function updateQuestionCount(currentQuestionIndex) {
       questionCount.innerText = `Question ${
         currentQuestionIndex + 1
@@ -203,9 +203,6 @@ document.addEventListener("DOMContentLoaded", () => {
       currentQuestionIndex + 1;
     }
     updateQuestionCount(currentQuestionIndex);
-    //  This value is hardcoded as a placeholder
-
-    // 4. Create and display new radio input element with a label for each choice.
 
     // Loop through the current question `choices`.
     question.choices.forEach((answer, index) => {
@@ -251,8 +248,16 @@ document.addEventListener("DOMContentLoaded", () => {
       // 2. Loop through all the choice elements and check which one is selected
       if (choice.checked) {
         selectedAnswer = choice.value;
+        error.style.display = "none";
       }
     });
+
+    if (!selectedAnswer) {
+      error.style.display = "flex";
+      error.innerText =
+        "Please select an answer before moving to the next question!";
+      return;
+    }
     //3. If an answer is selected (`selectedAnswer`), check if it is correct and move to the next question
     if (selectedAnswer) {
       if (quiz.checkAnswer(selectedAnswer)) {
@@ -284,6 +289,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 3. Update the result container (div#result) inner text to show the number of correct answers out of total questions
     resultContainer.innerText = `You scored ${quiz.correctAnswers} out of ${questions.length} correct answers!`; // This value is hardcoded as a placeholder
+
+    // Dispalying the message
+    const message = document.getElementById("message");
+    const resultPercentage = (quiz.correctAnswers * 100) / questions.length;
+    if (resultPercentage > 90) {
+      message.innerText =
+        "Very Good. You have answered almost all the questions!";
+    } else if (resultPercentage < 40) {
+      message.innerText = "What a pity :(  You can try one more time";
+      message.style.color = "#d9534f";
+      message.style.backgroundColor = "#ffe6e6";
+      message.style.border = "1px solid #d9534f";
+    } else if (resultPercentage > 60) {
+      message.innerText = "Good Job! If you want you can try again";
+    } else {
+      message.innerText = "It's on your side, you can try again or not ;)";
+      message.style.color = "#856404";
+      message.style.backgroundColor = "#fff3cd";
+      message.style.border = "1px solid #ffc107";
+    }
+    if (quiz.timeRemaining === 0) {
+      message.innerText = "Time Out! Dzin dzin dzin";
+      message.style.color = "#721c24";
+      message.style.backgroundColor = "#f8d7da";
+      message.style.border = "1px solid #dc3545";
+    }
   }
 
   //LAST ONE: Implement a “Restart Quiz” button:
